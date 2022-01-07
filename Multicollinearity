@@ -1,0 +1,61 @@
+### Multicollinearity occurs when two or more independent variables are highly correlated with one another in a regression model.
+
+#### Multicollinearity can be detected by VIF (Variable Inflation Factors).
+#### VIF determines the strength of the correlation between the independent variables. It is predicted by taking a variable and regressing it against every other variable. 
+#### VIF score of an independent variable represents how well the variable is explained by other independent variables.
+##### VIF starts at 1 and has no upper limit
+##### VIF = 1, no correlation between the independent variable and the other variables
+##### VIF exceeding 5 or 10 indicates high multicollinearity between this independent variable and the others
+
+def corr_matrix(df):
+    """
+    display correlation matrix for the dataframe
+    Parameters
+    ------
+    df: pd.DataFrame
+        data frame for which correlation matrix to be plotted
+    Returns
+    ------
+    plt.show(): matplotlib image
+        matplotlib image
+    """
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(18,10))
+    sns.heatmap(df.corr(), annot=True)
+    return plt.show()
+    
+def detecting_multicollinearity(X):
+    """
+    detecting multicollinearlity in dataframe
+    Parameters
+    ------
+    X: pd.DataFrame
+        data frame for which correlation matrix to be plotted
+    Returns
+    ------
+    vif: pd.DataFrame
+        vif dataframe 
+    """
+    import pandas as pd
+    from statsmodels.stats.outliers_influence import variance_inflation_factor
+    vif = pd.DataFrame()
+    vif["variables"] = X.columns
+    vif["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+    return vif.sort_values(by=['VIF'], ascending=False)
+    
+def handling_multicollinearity(X,col_matrix,cut_off=5):
+    """
+    handling multicollinearlity in dataframe
+    Parameters
+    ------
+    X: pd.DataFrame
+        data frame for which correlation matrix to be plotted
+    Returns
+    ------
+    X: pd.DataFrame
+        data frame with removed features which were highly corelated 
+    """
+    drop_list = col_matrix[col_matrix['VIF'] >= cut_off].variables.to_list()
+    X = X.drop(columns=drop_list,axis=1)
+    return X
